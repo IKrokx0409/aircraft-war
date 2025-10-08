@@ -6,6 +6,10 @@ import edu.hitsz.basic.AbstractFlyingObject;
 import edu.hitsz.prop.AbstractProp;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
+import edu.hitsz.factory.EliteEnemyFactory;
+import edu.hitsz.factory.EnemyFactory;
+import edu.hitsz.factory.MobEnemyFactory;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -26,6 +30,9 @@ public class Game extends JPanel {
      * Scheduled 线程池，用于任务调度
      */
     private final ScheduledExecutorService executorService;
+
+    private final EnemyFactory mobEnemyFactory;
+    private final EnemyFactory eliteEnemyFactory;
 
     /**
      * 时间间隔(ms)，控制刷新频率
@@ -67,10 +74,15 @@ public class Game extends JPanel {
     private boolean gameOverFlag = false;
 
     public Game() {
-        heroAircraft = new HeroAircraft(
-                Main.WINDOW_WIDTH / 2,
-                Main.WINDOW_HEIGHT - ImageManager.HERO_IMAGE.getHeight() ,
-                0, 0, 100);
+        heroAircraft = HeroAircraft.getInstance();
+
+//        heroAircraft = new HeroAircraft(
+//                Main.WINDOW_WIDTH / 2,
+//                Main.WINDOW_HEIGHT - ImageManager.HERO_IMAGE.getHeight() ,
+//                0, 0, 100);
+
+        this.mobEnemyFactory = new MobEnemyFactory();
+        this.eliteEnemyFactory = new EliteEnemyFactory();
 
         enemyAircrafts = new LinkedList<>();
         heroBullets = new LinkedList<>();
@@ -108,16 +120,18 @@ public class Game extends JPanel {
                 if (enemyAircrafts.size() < enemyMaxNumber) {
                     if (Math.random() < eliteProb) {
                         // 产生精英敌机
-                        enemyAircrafts.add(new EliteEnemy(
-                                (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.ELITE_ENEMY_IMAGE.getWidth())),
-                                (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05),
-                                5, 5, 60)); // 精英机可以横向移动
+//                        enemyAircrafts.add(new EliteEnemy(
+//                                (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.ELITE_ENEMY_IMAGE.getWidth())),
+//                                (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05),
+//                                5, 5, 60)); // 精英机可以横向移动
+                        enemyAircrafts.add(eliteEnemyFactory.createEnemy());
                     } else {
                         // 产生普通敌机
-                        enemyAircrafts.add(new MobEnemy(
-                                (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.MOB_ENEMY_IMAGE.getWidth())),
-                                (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05),
-                                0, 10, 30));
+//                        enemyAircrafts.add(new MobEnemy(
+//                                (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.MOB_ENEMY_IMAGE.getWidth())),
+//                                (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05),
+//                                0, 10, 30));
+                        enemyAircrafts.add(mobEnemyFactory.createEnemy());
                     }
                 }
                 // 飞机射出子弹

@@ -6,12 +6,17 @@ import edu.hitsz.bullet.HeroBullet;
 import java.util.LinkedList;
 import java.util.List;
 
+import edu.hitsz.application.ImageManager;
+import edu.hitsz.application.Main;
+
+
 /**
  * 英雄飞机，游戏玩家操控
  * @author hitsz
  */
 public class HeroAircraft extends AbstractAircraft {
 
+    private volatile static HeroAircraft instance = null;
     /**攻击方式 */
 
     /**
@@ -38,6 +43,20 @@ public class HeroAircraft extends AbstractAircraft {
      */
     public HeroAircraft(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
+    }
+
+    public static HeroAircraft getInstance() {
+        if (instance == null) {
+            synchronized (HeroAircraft.class) {
+                if (instance == null) {
+                    instance = new HeroAircraft(
+                            Main.WINDOW_WIDTH / 2,
+                            Main.WINDOW_HEIGHT - ImageManager.HERO_IMAGE.getHeight(),
+                            0, 0, 1000);
+                }
+            }
+        }
+        return instance;
     }
 
     @Override
@@ -74,3 +93,4 @@ public class HeroAircraft extends AbstractAircraft {
     }
 
 }
+

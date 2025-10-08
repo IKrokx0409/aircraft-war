@@ -1,0 +1,30 @@
+@startuml
+title "Factory Pattern - EnemyAircraft"
+
+abstract class EnemyFactory {
+  + {abstract} createEnemy(): AbstractEnemyAircraft
+}
+
+class MobEnemyFactory
+class EliteEnemyFactory
+
+EnemyFactory <|.. MobEnemyFactory
+EnemyFactory <|.. EliteEnemyFactory
+
+abstract class AbstractEnemyAircraft {
+}
+
+class MobEnemyFactory {
+  + createEnemy(): AbstractEnemyAircraft
+}
+class EliteEnemyFactory {
+  + createEnemy(): AbstractEnemy-aircraft
+}
+
+AbstractEnemyAircraft <|-- MobEnemy
+AbstractEnemyAircraft <|-- EliteEnemy
+
+MobEnemyFactory .> MobEnemy
+EliteEnemyFactory .> EliteEnemy
+
+@enduml

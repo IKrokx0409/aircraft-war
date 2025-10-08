@@ -8,6 +8,11 @@ import edu.hitsz.prop.BombProp;
 import edu.hitsz.prop.FireProp;
 import edu.hitsz.prop.HpProp;
 
+import edu.hitsz.factory.BombPropFactory;
+import edu.hitsz.factory.FirePropFactory;
+import edu.hitsz.factory.HpPropFactory;
+import edu.hitsz.factory.PropFactory;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -44,12 +49,22 @@ public class EliteEnemy extends AbstractEnemyAircraft {
         List<AbstractProp> props = new LinkedList<>();
         // 30%
         double r = Math.random();
-        if (r < 0.1) {
-            props.add(new HpProp(locationX, locationY, 0, 5));
-        } else if (r < 0.2) {
-            props.add(new FireProp(locationX, locationY, 0, 5));
-        } else if (r < 0.3) {
-            props.add(new BombProp(locationX, locationY, 0, 5));
+//        if (r < 0.1) {
+//            props.add(new HpProp(locationX, locationY, 0, 5));
+//        } else if (r < 0.2) {
+//            props.add(new FireProp(locationX, locationY, 0, 5));
+//        } else if (r < 0.3) {
+//            props.add(new BombProp(locationX, locationY, 0, 5));
+//        }
+        if (r < 0.3) {
+            PropFactory factory = new HpPropFactory();
+            props.add(factory.createProp(this.locationX, this.locationY));
+        } else if (r < 0.6) {
+            PropFactory factory = new FirePropFactory();
+            props.add(factory.createProp(this.locationX, this.locationY));
+        } else if (r < 0.9) {
+            PropFactory factory = new BombPropFactory();
+            props.add(factory.createProp(this.locationX, this.locationY));
         }
 
         return props;

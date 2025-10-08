@@ -1,0 +1,42 @@
+@startuml
+title "Factory Pattern - Prop"
+
+abstract class PropFactory {
+  + {abstract} createProp(int x, int y): AbstractProp
+}
+
+class HpPropFactory {
+  + createProp(int x, int y): AbstractProp
+}
+class FirePropFactory {
+  + createProp(int x, int y): AbstractProp
+}
+class BombPropFactory {
+  + createProp(int x, int y): AbstractProp
+}
+
+PropFactory <|.. HpPropFactory
+PropFactory <|.. FirePropFactory
+PropFactory <|.. BombPropFactory
+
+
+abstract class AbstractProp {
+}
+
+class HpProp {
+}
+class FireProp {
+}
+class BombProp {
+}
+
+AbstractProp <|-- HpProp
+AbstractProp <|-- FireProp
+AbstractProp <|-- BombProp
+
+
+HpPropFactory ..> HpProp
+FirePropFactory ..> FireProp
+BombPropFactory ..> BombProp
+
+@enduml
