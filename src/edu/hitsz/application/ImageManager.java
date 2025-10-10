@@ -7,6 +7,8 @@ import edu.hitsz.bullet.EnemyBullet;
 import edu.hitsz.bullet.HeroBullet;
 
 import edu.hitsz.aircraft.EliteEnemy;
+import edu.hitsz.aircraft.ElitePlusEnemy;
+import edu.hitsz.aircraft.BossEnemy;
 import edu.hitsz.prop.BombProp;
 import edu.hitsz.prop.FireProp;
 import edu.hitsz.prop.HpProp;
@@ -37,10 +39,12 @@ public class ImageManager {
     public static BufferedImage HERO_BULLET_IMAGE;
     public static BufferedImage ENEMY_BULLET_IMAGE;
     public static BufferedImage MOB_ENEMY_IMAGE;
-    public static BufferedImage ELITE_ENEMY_IMAGE; // [ADD]
-    public static BufferedImage PROP_BLOOD_IMAGE; // [ADD]
-    public static BufferedImage PROP_BOMB_IMAGE;  // [ADD]
-    public static BufferedImage PROP_BULLET_IMAGE;  // [ADD]
+    public static BufferedImage ELITE_ENEMY_IMAGE;
+    public static BufferedImage PROP_BLOOD_IMAGE;
+    public static BufferedImage PROP_BOMB_IMAGE;
+    public static BufferedImage PROP_BULLET_IMAGE;
+    public static BufferedImage ELITE_PLUS_ENEMY_IMAGE;
+    public static BufferedImage BOSS_ENEMY_IMAGE;
 
     static {
         try {
@@ -55,6 +59,8 @@ public class ImageManager {
             PROP_BLOOD_IMAGE = ImageIO.read(new FileInputStream("src/images/prop_blood.png"));
             PROP_BOMB_IMAGE = ImageIO.read(new FileInputStream("src/images/prop_bomb.png"));
             PROP_BULLET_IMAGE = ImageIO.read(new FileInputStream("src/images/prop_bullet.png"));
+            ELITE_PLUS_ENEMY_IMAGE = ImageIO.read(new FileInputStream("src/images/elitePlus.png"));
+            BOSS_ENEMY_IMAGE = ImageIO.read(new FileInputStream("src/images/boss.png"));
 
             CLASSNAME_IMAGE_MAP.put(HeroAircraft.class.getName(), HERO_IMAGE);
             CLASSNAME_IMAGE_MAP.put(MobEnemy.class.getName(), MOB_ENEMY_IMAGE);
@@ -64,6 +70,8 @@ public class ImageManager {
             CLASSNAME_IMAGE_MAP.put(HpProp.class.getName(), PROP_BLOOD_IMAGE);
             CLASSNAME_IMAGE_MAP.put(BombProp.class.getName(), PROP_BOMB_IMAGE);
             CLASSNAME_IMAGE_MAP.put(FireProp.class.getName(), PROP_BULLET_IMAGE);
+            CLASSNAME_IMAGE_MAP.put(ElitePlusEnemy.class.getName(), ELITE_PLUS_ENEMY_IMAGE);
+            CLASSNAME_IMAGE_MAP.put(BossEnemy.class.getName(), BOSS_ENEMY_IMAGE);
 
 
         } catch (IOException e) {

@@ -9,6 +9,8 @@ import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import edu.hitsz.factory.EliteEnemyFactory;
 import edu.hitsz.factory.EnemyFactory;
 import edu.hitsz.factory.MobEnemyFactory;
+import edu.hitsz.factory.ElitePlusEnemyFactory;
+import edu.hitsz.factory.BossFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,6 +18,8 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.*;
+
+
 
 /**
  * 游戏主面板，游戏启动
@@ -33,6 +37,8 @@ public class Game extends JPanel {
 
     private final EnemyFactory mobEnemyFactory;
     private final EnemyFactory eliteEnemyFactory;
+    private final EnemyFactory elitePlusEnemyFactory;
+    private final EnemyFactory bossFactory;
 
     /**
      * 时间间隔(ms)，控制刷新频率
@@ -49,6 +55,12 @@ public class Game extends JPanel {
      */
     private int enemyMaxNumber = 5;
     private double eliteProb = 0.3;
+    private double elitePlusProb = 0.15;
+
+    // Boss机相关状态
+    private final int bossScoreThreshold = 300;
+    private int bossSpawnCount = 0;
+    private boolean bossIsActive = false;
     /**
      * 当前得分
      */
@@ -63,10 +75,10 @@ public class Game extends JPanel {
      * 指示子弹的发射、敌机的产生频率
      */
     private int cycleDuration = 600;
+    private int heroShootCycleDuration = 250;
     private int cycleTime = 0;
+    private int heroShootCycleTime = 0;
 
-//    private int shootCycleDuration = 1000;
-//    private int shootCycleTime = 0;
 
     /**
      * 游戏结束标志
@@ -75,14 +87,10 @@ public class Game extends JPanel {
 
     public Game() {
         heroAircraft = HeroAircraft.getInstance();
-
-//        heroAircraft = new HeroAircraft(
-//                Main.WINDOW_WIDTH / 2,
-//                Main.WINDOW_HEIGHT - ImageManager.HERO_IMAGE.getHeight() ,
-//                0, 0, 100);
-
         this.mobEnemyFactory = new MobEnemyFactory();
         this.eliteEnemyFactory = new EliteEnemyFactory();
+        this.elitePlusEnemyFactory = new ElitePlusEnemyFactory();
+        this.bossFactory = new BossFactory();
 
         enemyAircrafts = new LinkedList<>();
         heroBullets = new LinkedList<>();
@@ -110,34 +118,26 @@ public class Game extends JPanel {
         Runnable task = () -> {
 
             time += timeInterval;
-
-
             // 周期性执行（控制频率）
             if (timeCountAndNewCycleJudge()) {
                 System.out.println(time);
                 // 新敌机产生
-
                 if (enemyAircrafts.size() < enemyMaxNumber) {
-                    if (Math.random() < eliteProb) {
-                        // 产生精英敌机
-//                        enemyAircrafts.add(new EliteEnemy(
-//                                (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.ELITE_ENEMY_IMAGE.getWidth())),
-//                                (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05),
-//                                5, 5, 60)); // 精英机可以横向移动
+                    double r = Math.random();
+                    if ( r < elitePlusProb) {
+                        enemyAircrafts.add(elitePlusEnemyFactory.createEnemy());
+                    }
+                    else if ( r < eliteProb + elitePlusProb) {
                         enemyAircrafts.add(eliteEnemyFactory.createEnemy());
                     } else {
-                        // 产生普通敌机
-//                        enemyAircrafts.add(new MobEnemy(
-//                                (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.MOB_ENEMY_IMAGE.getWidth())),
-//                                (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05),
-//                                0, 10, 30));
                         enemyAircrafts.add(mobEnemyFactory.createEnemy());
                     }
                 }
-                // 飞机射出子弹
+
+                // 敌方飞机射出子弹
                 shootAction();
             }
-
+            heroShootAction();
             // 子弹移动
             bulletsMoveAction();
 
@@ -194,8 +194,18 @@ public class Game extends JPanel {
         for (AbstractAircraft enemy : enemyAircrafts) {
             enemyBullets.addAll(enemy.shoot());
         }
-        // 英雄射击
-        heroBullets.addAll(heroAircraft.shoot());
+//        // 英雄射击
+//        heroBullets.addAll(heroAircraft.shoot());
+    }
+
+    private void heroShootAction() {
+        heroShootCycleTime += timeInterval;
+        if (heroShootCycleTime >= heroShootCycleDuration) {
+            heroShootCycleTime %= heroShootCycleDuration;
+            if(!gameOverFlag){
+                heroBullets.addAll(heroAircraft.shoot());
+            }
+        }
     }
 
     private void bulletsMoveAction() {
@@ -227,6 +237,8 @@ public class Game extends JPanel {
      */
     private void crashCheckAction() {
         // TODO 敌机子弹攻击英雄
+        List<AbstractEnemyAircraft> newEnemies = new LinkedList<>();
+
         for (BaseBullet bullet : enemyBullets) {
             if (bullet.notValid()) {
                 continue;
@@ -244,26 +256,35 @@ public class Game extends JPanel {
             }
             for (AbstractEnemyAircraft  enemyAircraft : enemyAircrafts) {
                 if (enemyAircraft.notValid()) {
-                    // 已被其他子弹击毁的敌机，不再检测
-                    // 避免多个子弹重复击毁同一敌机的判定
                     continue;
                 }
                 if (enemyAircraft.crash(bullet)) {
-                    // 敌机撞击到英雄机子弹
-                    // 敌机损失一定生命值
                     enemyAircraft.decreaseHp(bullet.getPower());
                     bullet.vanish();
                     if (enemyAircraft.notValid()) {
-                        // TODO 获得分数，产生道具补给
-                        if (enemyAircraft instanceof EliteEnemy) {
+                        if (enemyAircraft instanceof ElitePlusEnemy) {
+                            score += 30;
+                            props.addAll(enemyAircraft.dropProps());
+                        } else if (enemyAircraft instanceof EliteEnemy) {
                             score += 20;
-                            props.addAll(enemyAircraft.dropProps()); // 掉落道具
+                            props.addAll(enemyAircraft.dropProps());
+                        } else if (enemyAircraft instanceof BossEnemy) {
+                            score += 100;
+                            props.addAll(enemyAircraft.dropProps());
+                            bossIsActive = false;
                         } else {
                             score += 10;
                         }
+
+                        if (!bossIsActive && score / bossScoreThreshold > bossSpawnCount) {
+                            System.out.println("Boss is coming!");
+                            newEnemies.add(bossFactory.createEnemy());
+                            bossIsActive = true;
+                            bossSpawnCount++;
+                        }
                     }
                 }
-                // 英雄机 与 敌机 相撞，均损毁
+                // 英雄机 与 敌机 相撞
                 if (enemyAircraft.crash(heroAircraft) || heroAircraft.crash(enemyAircraft)) {
                     enemyAircraft.vanish();
                     heroAircraft.decreaseHp(Integer.MAX_VALUE);
@@ -271,7 +292,7 @@ public class Game extends JPanel {
             }
         }
 
-        // Todo: 我方获得道具，道具生效
+        // 我方获得道具
         for (AbstractProp prop : props) {
             if (prop.notValid()) {
                 continue;
@@ -281,6 +302,8 @@ public class Game extends JPanel {
             }
         }
 
+        // 统一将新生成的敌机添加到主列表中
+        enemyAircrafts.addAll(newEnemies);
     }
 
     /**
