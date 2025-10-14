@@ -12,6 +12,12 @@ import edu.hitsz.factory.MobEnemyFactory;
 import edu.hitsz.factory.ElitePlusEnemyFactory;
 import edu.hitsz.factory.BossFactory;
 
+import edu.hitsz.dao.GameRecord;
+import edu.hitsz.dao.GameRecordDao;
+import edu.hitsz.dao.GameRecordDaoImpl;
+import java.util.Date;
+import java.util.Comparator;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -58,7 +64,7 @@ public class Game extends JPanel {
     private double elitePlusProb = 0.15;
 
     // Boss机相关状态
-    private final int bossScoreThreshold = 300;
+    private final int bossScoreThreshold = 500;
     private int bossSpawnCount = 0;
     private boolean bossIsActive = false;
     /**
@@ -75,7 +81,7 @@ public class Game extends JPanel {
      * 指示子弹的发射、敌机的产生频率
      */
     private int cycleDuration = 600;
-    private int heroShootCycleDuration = 250;
+    private int heroShootCycleDuration = 400;
     private int cycleTime = 0;
     private int heroShootCycleTime = 0;
 
@@ -162,6 +168,28 @@ public class Game extends JPanel {
                 executorService.shutdown();
                 gameOverFlag = true;
                 System.out.println("Game Over!");
+
+                // lab4.2 评分和排行榜
+                GameRecordDao dao = new GameRecordDaoImpl();
+
+                String playerName = "Player";
+                GameRecord newRecord = new GameRecord(playerName, this.score, new Date());
+                dao.addRecord(newRecord);
+
+                List<GameRecord> records = dao.getAllRecords();
+                records.sort(Comparator.comparingInt(GameRecord::getScore).reversed());
+
+                System.out.println("*************************************");
+                System.out.println("          ---RANKING LIST---         ");
+                System.out.println("*************************************");
+                int rank = 1;
+                for (GameRecord record : records) {
+                    System.out.printf("rank%2d: %s, %6d, %s\n",
+                            rank++,
+                            record.getPlayerName(),
+                            record.getScore(),
+                            record.getFormattedTimestamp());
+                }
             }
 
         };

@@ -12,7 +12,7 @@ public class BossFactory extends EnemyFactory {
                 100,
                 5,
                 0,
-                500
+                1000
         );
     }
 }

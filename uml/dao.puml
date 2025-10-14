@@ -1,0 +1,36 @@
+@startuml
+title "Ranking List - DAO Pattern"
+
+class Game {
+}
+
+class GameRecord {
+    - playerName: String
+    - score: int
+    - timestamp: Date
+    --
+    + GameRecord(String, int, Date)
+    + getPlayerName(): String
+    + getScore(): int
+    + getFormattedTimestamp(): String
+}
+
+interface GameRecordDao {
+    + addRecord(record: GameRecord): void
+    + getAllRecords(): List<GameRecord>
+}
+
+class GameRecordDaoImpl {
+    - records: List<GameRecord>
+    --
+    + GameRecordDaoImpl()
+    + addRecord(record: GameRecord): void
+    + getAllRecords(): List<GameRecord>
+}
+
+
+GameRecordDao <|.. GameRecordDaoImpl
+Game ..> GameRecordDao
+GameRecordDaoImpl --> GameRecord
+
+@enduml

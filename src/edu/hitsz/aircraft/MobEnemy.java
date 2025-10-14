@@ -3,6 +3,7 @@ package edu.hitsz.aircraft;
 import edu.hitsz.application.Main;
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.prop.AbstractProp;
+import edu.hitsz.strategy.NoShoot;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -13,10 +14,11 @@ import java.util.List;
  *
  * @author hitsz
  */
-public class MobEnemy extends AbstractEnemyAircraft { // [MODIFY]
+public class MobEnemy extends AbstractEnemyAircraft {
 
     public MobEnemy(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
+        this.setStrategy(new NoShoot());
     }
 
     @Override

@@ -1,0 +1,41 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+title "shoot-Strategy Pattern"
+
+'class Strategypattern {
+'
+'}
+
+class AbstractAircraft {
+    - strategy: ShootStrategy
+    + setStrategy(strategy: ShootStrategy): void
+    + shoot(): List<BaseBullet>
+}
+
+interface ShootStrategy {
+    + shoot(aircraft: AbstractAircraft): List<BaseBullet>
+}
+
+class DirectShoot {
+    + shoot(aircraft: AbstractAircraft): List<BaseBullet>
+}
+class ScatterShoot {
+    + shoot(aircraft: AbstractAircraft): List<BaseBullet>
+}
+class CircularShoot {
+    + shoot(aircraft: AbstractAircraft): List<BaseBullet>
+}
+class NoShoot {
+    + shoot(aircraft: AbstractAircraft): List<BaseBullet>
+}
+
+'AbstractAircraft <.. Strategypattern
+AbstractAircraft o-- ShootStrategy
+ShootStrategy <-- AbstractAircraft
+ShootStrategy <|.. DirectShoot
+ShootStrategy <|.. ScatterShoot
+ShootStrategy <|.. CircularShoot
+ShootStrategy <|.. NoShoot
+
+@enduml

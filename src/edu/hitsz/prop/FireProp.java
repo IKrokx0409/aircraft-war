@@ -1,6 +1,7 @@
 package edu.hitsz.prop;
 
 import edu.hitsz.aircraft.HeroAircraft;
+import edu.hitsz.strategy.ScatterShoot;
 
 public class FireProp extends AbstractProp {
 
@@ -12,6 +13,7 @@ public class FireProp extends AbstractProp {
     public void activate(HeroAircraft hero) {
         // todo: FireProb实际功能
         System.out.println("FireSupply active!");
+        hero.setStrategy(new ScatterShoot());
         this.vanish();
     }
 }

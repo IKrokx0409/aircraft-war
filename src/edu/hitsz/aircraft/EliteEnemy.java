@@ -3,15 +3,13 @@ package edu.hitsz.aircraft;
 
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.bullet.EnemyBullet;
+import edu.hitsz.factory.*;
 import edu.hitsz.prop.AbstractProp;
 import edu.hitsz.prop.BombProp;
 import edu.hitsz.prop.FireProp;
 import edu.hitsz.prop.HpProp;
 
-import edu.hitsz.factory.BombPropFactory;
-import edu.hitsz.factory.FirePropFactory;
-import edu.hitsz.factory.HpPropFactory;
-import edu.hitsz.factory.PropFactory;
+import edu.hitsz.strategy.DirectShoot;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -25,24 +23,27 @@ import java.util.List;
 public class EliteEnemy extends AbstractEnemyAircraft {
 
     /** 攻击方式 */
-    private final int shootNum = 1;
-    private final int power = 20;
-    private final int direction = 1;
+//    private final int shootNum = 1;
+//    private int power = 20;
+//    private int direction = 1;
 
     public EliteEnemy(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
+        this.power = 20;
+        this.direction = 1;
+        this.setStrategy(new DirectShoot());
     }
 
-    @Override
-    public List<BaseBullet> shoot() {
-        List<BaseBullet> res = new LinkedList<>();
-        int x = this.getLocationX();
-        int y = this.getLocationY() + direction * 2;
-        int speedY = this.getSpeedY() + direction * 4;
-        BaseBullet bullet = new EnemyBullet(x, y, 0, speedY, power);
-        res.add(bullet);
-        return res;
-    }
+//    @Override
+//    public List<BaseBullet> shoot() {
+//        List<BaseBullet> res = new LinkedList<>();
+//        int x = this.getLocationX();
+//        int y = this.getLocationY() + direction * 2;
+//        int speedY = this.getSpeedY() + direction * 4;
+//        BaseBullet bullet = new EnemyBullet(x, y, 0, speedY, power);
+//        res.add(bullet);
+//        return res;
+//    }
 
     @Override
     public List<AbstractProp> dropProps() {
@@ -56,14 +57,17 @@ public class EliteEnemy extends AbstractEnemyAircraft {
 //        } else if (r < 0.3) {
 //            props.add(new BombProp(locationX, locationY, 0, 5));
 //        }
-        if (r < 0.3) {
+        if (r < 0.25) {
             PropFactory factory = new HpPropFactory();
             props.add(factory.createProp(this.locationX, this.locationY));
-        } else if (r < 0.6) {
+        } else if (r < 0.45) {
             PropFactory factory = new FirePropFactory();
             props.add(factory.createProp(this.locationX, this.locationY));
-        } else if (r < 0.9) {
+        } else if (r < 0.7) {
             PropFactory factory = new BombPropFactory();
+            props.add(factory.createProp(this.locationX, this.locationY));
+        } else if (r < 0.9) {
+            PropFactory factory = new FirePlusPropFactory();
             props.add(factory.createProp(this.locationX, this.locationY));
         }
 
