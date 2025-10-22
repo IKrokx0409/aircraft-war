@@ -3,6 +3,7 @@ package edu.hitsz.aircraft;
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.bullet.HeroBullet;
 import edu.hitsz.strategy.DirectShoot;
+import edu.hitsz.strategy.ShootStrategy;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -35,6 +36,8 @@ public class HeroAircraft extends AbstractAircraft {
 //     */
 //    private int direction = -1;
 
+    private Thread propTimerThread;
+
     /**
      * @param locationX 英雄机位置x坐标
      * @param locationY 英雄机位置y坐标
@@ -61,6 +64,29 @@ public class HeroAircraft extends AbstractAircraft {
             }
         }
         return instance;
+    }
+
+    public void resetShootStrategy() {
+        this.setStrategy(new DirectShoot());
+    }
+
+    public void activatePropEffect(long times) {
+        if (propTimerThread != null && propTimerThread.isAlive()) {
+            propTimerThread.interrupt();
+        }
+
+        // Runnable
+        Runnable task = () -> {
+            try {
+                Thread.sleep(times);
+                resetShootStrategy();
+            } catch (InterruptedException e) {
+            }
+        };
+
+        // 创建并启动新的计时器线程
+        propTimerThread = new Thread(task);
+        propTimerThread.start();
     }
 
     @Override

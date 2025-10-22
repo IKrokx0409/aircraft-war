@@ -12,6 +12,7 @@ public class FirePlusProp extends AbstractProp {
     public void activate(HeroAircraft hero) {
         System.out.println("SuperFireSupply active!");
         hero.setStrategy(new CircularShoot());
+        hero.activatePropEffect(5000);
         this.vanish();
     }
 }

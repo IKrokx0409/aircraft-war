@@ -11,9 +11,9 @@ public class FireProp extends AbstractProp {
 
     @Override
     public void activate(HeroAircraft hero) {
-        // todo: FireProb实际功能
         System.out.println("FireSupply active!");
         hero.setStrategy(new ScatterShoot());
+        hero.activatePropEffect(5000);
         this.vanish();
     }
 }

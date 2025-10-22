@@ -4,6 +4,7 @@ import edu.hitsz.aircraft.*;
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.basic.AbstractFlyingObject;
 import edu.hitsz.prop.AbstractProp;
+import edu.hitsz.ui.RankingPanel;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 
 import edu.hitsz.factory.EliteEnemyFactory;
@@ -15,6 +16,9 @@ import edu.hitsz.factory.BossFactory;
 import edu.hitsz.dao.GameRecord;
 import edu.hitsz.dao.GameRecordDao;
 import edu.hitsz.dao.GameRecordDaoImpl;
+
+import edu.hitsz.audio.MusicThread;
+
 import java.util.Date;
 import java.util.Comparator;
 
@@ -85,18 +89,25 @@ public class Game extends JPanel {
     private int cycleTime = 0;
     private int heroShootCycleTime = 0;
 
+    private boolean soundEnabled;
+    private MusicThread bgmThread;
+    private MusicThread bossBgmThread;
+
+    private BufferedImage BackgroundImage;
+    private String difficulty;
 
     /**
      * 游戏结束标志
      */
     private boolean gameOverFlag = false;
 
-    public Game() {
+    public Game(String difficulty, boolean soundEnabled) {
         heroAircraft = HeroAircraft.getInstance();
         this.mobEnemyFactory = new MobEnemyFactory();
         this.eliteEnemyFactory = new EliteEnemyFactory();
         this.elitePlusEnemyFactory = new ElitePlusEnemyFactory();
         this.bossFactory = new BossFactory();
+        this.difficulty = difficulty;
 
         enemyAircrafts = new LinkedList<>();
         heroBullets = new LinkedList<>();
@@ -109,6 +120,28 @@ public class Game extends JPanel {
          */
         this.executorService = new ScheduledThreadPoolExecutor(1,
                 new BasicThreadFactory.Builder().namingPattern("game-action-%d").daemon(true).build());
+
+        this.soundEnabled = soundEnabled;
+        if (this.soundEnabled) {
+            bgmThread = new MusicThread("src/videos/bgm.wav", true);
+            bgmThread.start();
+        }
+
+        switch (difficulty) {
+            case "EASY":
+                BackgroundImage = ImageManager.BACKGROUND_IMAGE_EASY;
+                break;
+            case "NORMAL":
+                BackgroundImage = ImageManager.BACKGROUND_IMAGE_NORMAL;
+                break;
+            case "HARD":
+                BackgroundImage = ImageManager.BACKGROUND_IMAGE_HARD;
+                break;
+            default:
+                BackgroundImage = ImageManager.BACKGROUND_IMAGE_EASY;
+                break;
+        }
+
 
         //启动英雄机鼠标监听
         new HeroController(this, heroAircraft);
@@ -167,29 +200,62 @@ public class Game extends JPanel {
                 // 游戏结束
                 executorService.shutdown();
                 gameOverFlag = true;
+
+                if (soundEnabled) {
+                    if (bgmThread != null) {
+                        bgmThread.stopMusic();
+                    }
+                    if (bossBgmThread != null) {
+                        bossBgmThread.stopMusic();
+                    }
+                    new MusicThread("src/videos/game_over.wav").start();
+                }
+
                 System.out.println("Game Over!");
 
                 // lab4.2 评分和排行榜
-                GameRecordDao dao = new GameRecordDaoImpl();
+                String playerName = JOptionPane.showInputDialog(
+                        this,
+                        "游戏结束, 你的得分为 " + this.score + "。\n请输入你的名字:",
+                        "记录得分",
+                        JOptionPane.PLAIN_MESSAGE
+                );
 
-                String playerName = "Player";
-                GameRecord newRecord = new GameRecord(playerName, this.score, new Date());
-                dao.addRecord(newRecord);
-
-                List<GameRecord> records = dao.getAllRecords();
-                records.sort(Comparator.comparingInt(GameRecord::getScore).reversed());
-
-                System.out.println("*************************************");
-                System.out.println("          ---RANKING LIST---         ");
-                System.out.println("*************************************");
-                int rank = 1;
-                for (GameRecord record : records) {
-                    System.out.printf("rank%2d: %s, %6d, %s\n",
-                            rank++,
-                            record.getPlayerName(),
-                            record.getScore(),
-                            record.getFormattedTimestamp());
+                if (playerName != null && !playerName.trim().isEmpty()) {
+                    GameRecordDao dao = new GameRecordDaoImpl();
+                    GameRecord newRecord = new GameRecord(playerName.trim(), this.score, new Date());
+                    dao.addRecord(newRecord, this.difficulty);
+                    System.out.println("得分已记录。");
+                } else {
+                    System.out.println("得分未记录。");
                 }
+
+                RankingPanel rankingPanel = new RankingPanel(this.difficulty);
+
+                Main.cardPanel.remove(rankingPanel);
+                Main.cardPanel.add(rankingPanel, "RANKING_" + this.difficulty);
+                Main.cardLayout.show(Main.cardPanel, "RANKING_" +  this.difficulty);
+
+//                GameRecordDao dao = new GameRecordDaoImpl();
+//
+//                String playerName = "Player";
+//                GameRecord newRecord = new GameRecord(playerName, this.score, new Date());
+//                dao.addRecord(newRecord);
+
+//                List<GameRecord> records = dao.getAllRecords();
+//                records.sort(Comparator.comparingInt(GameRecord::getScore).reversed());
+//
+//                System.out.println("*************************************");
+//                System.out.println("          ---RANKING LIST---         ");
+//                System.out.println("*************************************");
+//                int rank = 1;
+//                for (GameRecord record : records) {
+//                    System.out.printf("rank%2d: %s, %6d, %s\n",
+//                            rank++,
+//                            record.getPlayerName(),
+//                            record.getScore(),
+//                            record.getFormattedTimestamp());
+//                }
             }
 
         };
@@ -287,6 +353,11 @@ public class Game extends JPanel {
                     continue;
                 }
                 if (enemyAircraft.crash(bullet)) {
+
+                    if (soundEnabled) {
+                        new MusicThread("src/videos/bullet_hit.wav").start();
+                    }
+
                     enemyAircraft.decreaseHp(bullet.getPower());
                     bullet.vanish();
                     if (enemyAircraft.notValid()) {
@@ -300,6 +371,17 @@ public class Game extends JPanel {
                             score += 100;
                             props.addAll(enemyAircraft.dropProps());
                             bossIsActive = false;
+
+                            if (soundEnabled) {
+                                if (bossBgmThread != null) {
+                                    bossBgmThread.stopMusic();
+                                }
+                                // 启动普通BGM
+                                if (bgmThread != null) bgmThread.stopMusic(); // 停止旧BGM
+                                bgmThread = new MusicThread("src/videos/bgm.wav", true);
+                                bgmThread.start();
+                            }
+
                         } else {
                             score += 10;
                         }
@@ -309,6 +391,17 @@ public class Game extends JPanel {
                             newEnemies.add(bossFactory.createEnemy());
                             bossIsActive = true;
                             bossSpawnCount++;
+
+                            if (soundEnabled) {
+                                if (bgmThread != null) {
+                                    bgmThread.stopMusic();
+                                }
+                                // 启动Boss BGM
+                                if (bossBgmThread != null) bossBgmThread.stopMusic(); // 停止Boss BGM
+                                bossBgmThread = new MusicThread("src/videos/bgm_boss.wav", true);
+                                bossBgmThread.start();
+                            }
+
                         }
                     }
                 }
@@ -326,6 +419,9 @@ public class Game extends JPanel {
                 continue;
             }
             if (heroAircraft.crash(prop)) {
+                if (soundEnabled) {
+                    new MusicThread("src/videos/get_supply.wav").start();
+                }
                 prop.activate(heroAircraft);
             }
         }
@@ -364,8 +460,10 @@ public class Game extends JPanel {
         super.paint(g);
 
         // 绘制背景,图片滚动
-        g.drawImage(ImageManager.BACKGROUND_IMAGE, 0, this.backGroundTop - Main.WINDOW_HEIGHT, null);
-        g.drawImage(ImageManager.BACKGROUND_IMAGE, 0, this.backGroundTop, null);
+        g.drawImage(BackgroundImage, 0, this.backGroundTop - Main.WINDOW_HEIGHT, null);
+        g.drawImage(BackgroundImage, 0, this.backGroundTop, null);
+//        g.drawImage(ImageManager.BACKGROUND_IMAGE, 0, this.backGroundTop - Main.WINDOW_HEIGHT, null);
+//        g.drawImage(ImageManager.BACKGROUND_IMAGE, 0, this.backGroundTop, null);
         this.backGroundTop += 1;
         if (this.backGroundTop == Main.WINDOW_HEIGHT) {
             this.backGroundTop = 0;
