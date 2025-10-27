@@ -1,0 +1,43 @@
+@startuml
+title "Observer Pattern - Bomb Prop"
+
+class BombProp {
+    - observers: List<BombObserver>
+    + registerObserver(o: BombObserver): void
+    + removeObserver(o: BombObserver): void
+    + notifyObservers(): void
+    + activate(hero: HeroAircraft): void
+}
+
+interface BombObserver {
+    + update(): void
+}
+
+abstract class AbstractEnemyAircraft {
+    + update(): void
+}
+class MobEnemy {
+ + update(): void
+}
+class EliteEnemy {
+ + update(): void
+}
+class ElitePlusEnemy {
+ + update(): void
+}
+
+class Game {
+    - enemyBullets: List<BaseBullet>
+    + update(): void
+}
+
+BombProp o->  BombObserver
+Game ..> BombProp
+BombObserver <|.. AbstractEnemyAircraft
+BombObserver <|.. Game
+
+AbstractEnemyAircraft <|-- MobEnemy
+AbstractEnemyAircraft <|-- EliteEnemy
+AbstractEnemyAircraft <|-- ElitePlusEnemy
+
+@enduml

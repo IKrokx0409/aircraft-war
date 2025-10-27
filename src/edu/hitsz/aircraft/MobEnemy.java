@@ -27,7 +27,12 @@ public class MobEnemy extends AbstractEnemyAircraft {
     }
 
     @Override
-    public List<AbstractProp> dropProps() { // [ADD]
+    public List<AbstractProp> dropProps() {
         return new LinkedList<>();
+    }
+
+    @Override
+    public void Bombupdate() {
+        this.vanish();
     }
 }

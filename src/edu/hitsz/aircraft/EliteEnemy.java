@@ -34,6 +34,11 @@ public class EliteEnemy extends AbstractEnemyAircraft {
         this.setStrategy(new DirectShoot());
     }
 
+    @Override
+    public void Bombupdate() {
+        this.vanish();
+    }
+
 //    @Override
 //    public List<BaseBullet> shoot() {
 //        List<BaseBullet> res = new LinkedList<>();

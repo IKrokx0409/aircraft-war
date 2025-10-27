@@ -1,0 +1,52 @@
+@startuml
+title "Template Pattern - Game Mode"
+
+abstract class Game {
+    + {final} initializeGame(): void
+    .. Template Steps ..
+    # {abstract} loadBackground(): void
+    # {abstract} setEnemySpawnParameters(): void
+    # {abstract} setBossParameters(): void
+    # {abstract} adjustDifficultyFactors(): void
+    # shouldIncreaseDifficultyOverTime(): boolean
+    # shouldSpawnBoss(): boolean
+    ---
+    + action(): void
+    + paint(g: Graphics): void
+    + crashCheckAction(): void
+    + ……
+}
+
+
+class EasyGame {
+    # loadBackground(): void
+    # setEnemySpawnParameters(): void
+    # setBossParameters(): void
+    # adjustDifficultyFactors(): void
+    # shouldIncreaseDifficultyOverTime(): boolean
+    # shouldSpawnBoss(): boolean
+}
+
+class NormalGame {
+    # loadBackground(): void
+    # setEnemySpawnParameters(): void
+    # setBossParameters(): void ' Boss HP constant
+    # adjustDifficultyFactors(): void
+    # shouldIncreaseDifficultyOverTime(): boolean
+    # shouldSpawnBoss(): boolean
+}
+
+class HardGame {
+    # loadBackground(): void
+    # setEnemySpawnParameters(): void
+    # setBossParameters(): void ' Boss HP increases
+    # adjustDifficultyFactors(): void
+    # shouldIncreaseDifficultyOverTime(): boolean
+    # shouldSpawnBoss(): boolean
+}
+
+Game <|-- EasyGame
+Game <|-- NormalGame
+Game <|-- HardGame
+
+@enduml

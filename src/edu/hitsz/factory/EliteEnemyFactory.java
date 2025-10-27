@@ -6,11 +6,27 @@ import edu.hitsz.application.ImageManager;
 import edu.hitsz.application.Main;
 
 public class EliteEnemyFactory extends EnemyFactory {
+//    @Override
+//    public AbstractEnemyAircraft createEnemy() {
+//        return new EliteEnemy(
+//                (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.ELITE_ENEMY_IMAGE.getWidth())),
+//                (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05),
+//                5, 5, 60);
+//    }
+
     @Override
-    public AbstractEnemyAircraft createEnemy() {
+    public AbstractEnemyAircraft createEnemy(double hpMultiplier, double speedMultiplier) {
+        int baseHp = 60;
+        int baseSpeedX = 5;
+        int baseSpeedY = 5;
+
+        int hp = (int) (baseHp * hpMultiplier);
+        int speedX = baseSpeedX;
+        int speedY = (int) (baseSpeedY * speedMultiplier);
+
         return new EliteEnemy(
                 (int) (Math.random() * (Main.WINDOW_WIDTH - ImageManager.ELITE_ENEMY_IMAGE.getWidth())),
                 (int) (Math.random() * Main.WINDOW_HEIGHT * 0.05),
-                5, 5, 60);
+                speedX, speedY, hp);
     }
 }

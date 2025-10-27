@@ -1,7 +1,6 @@
 package edu.hitsz.ui;
 
-import edu.hitsz.application.Game;
-import edu.hitsz.application.Main;
+import edu.hitsz.application.*;
 
 import javax.swing.*;
 import javax.swing.JPanel;
@@ -42,11 +41,26 @@ public class StartPanel {
     private void startGame(String difficulty) {
         boolean soundEnabled = soundCheckBox.isSelected();
 
-        Game gamePanel = new Game(difficulty, soundEnabled);
+        // [MODIFY] 根据难度创建不同的 Game 子类实例
+        Game gamePanel;
+        switch (difficulty) {
+            case "EASY":
+                gamePanel = new EasyGame(soundEnabled);
+                break;
+            case "NORMAL":
+                gamePanel = new NormalGame(soundEnabled);
+                break;
+            case "HARD":
+                gamePanel = new HardGame(soundEnabled);
+                break;
+            default:
+                gamePanel = new EasyGame(soundEnabled);
+                break;
+        }
 
-        Main.cardPanel.add(gamePanel, "GAME");
-        Main.cardLayout.show(Main.cardPanel, "GAME");
-        gamePanel.action();
+        Main.cardPanel.add(gamePanel, "GAME_" + difficulty);
+        Main.cardLayout.show(Main.cardPanel, "GAME_" + difficulty);
+        gamePanel.action(); // 启动游戏
     }
 
     public JPanel getMainPanel() {

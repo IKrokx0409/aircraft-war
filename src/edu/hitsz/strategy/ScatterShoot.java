@@ -18,7 +18,7 @@ public class ScatterShoot implements ShootStrategy {
         int shootNum = 5;
 
         for (int i = 0; i < shootNum; i++) {
-            int speedX = (i - 1) * 5;
+            int speedX = (i - 2) * 5;
             BaseBullet bullet;
             if (aircraft instanceof HeroAircraft) {
                 bullet = new HeroBullet(x, y, speedX, speedY, aircraft.getPower());

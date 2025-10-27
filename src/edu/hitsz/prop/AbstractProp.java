@@ -21,5 +21,7 @@ public abstract class AbstractProp extends AbstractFlyingObject {
         }
     }
 
-    public abstract void activate(HeroAircraft hero);
+    public void activate(HeroAircraft hero){
+        this.vanish();
+    };
 }

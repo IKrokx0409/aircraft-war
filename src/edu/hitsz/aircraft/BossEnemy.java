@@ -22,6 +22,10 @@ public class BossEnemy extends AbstractEnemyAircraft {
     }
 
     @Override
+    public void Bombupdate() {
+    }
+
+    @Override
     public void forward() {
         super.forward();
         // 不向下移动

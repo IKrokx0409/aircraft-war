@@ -3,6 +3,7 @@ package edu.hitsz.aircraft;
 import edu.hitsz.basic.AbstractFlyingObject;
 import edu.hitsz.bullet.BaseBullet;
 import edu.hitsz.strategy.ShootStrategy;
+import edu.hitsz.observer.BombObserver;
 
 import java.util.List;
 
@@ -50,6 +51,8 @@ public abstract class AbstractAircraft extends AbstractFlyingObject {
 
     public int getPower() { return power; }
     public int getDirection() { return direction; }
+
+    // public abstract void Bombupdate();
     /**
      * 飞机射击方法，可射击对象必须实现
      * @return

@@ -21,6 +21,11 @@ public class ElitePlusEnemy extends AbstractEnemyAircraft {
         this.setStrategy(new ScatterShoot());
     }
 
+    @Override
+    public void Bombupdate() {
+        this.decreaseHp(30);
+    }
+
 //    @Override
 //    public List<BaseBullet> shoot() {
 //        List<BaseBullet> res = new LinkedList<>();

@@ -1,6 +1,7 @@
 package edu.hitsz.aircraft;
 
 import edu.hitsz.application.Main;
+import edu.hitsz.observer.BombObserver;
 import edu.hitsz.prop.AbstractProp;
 
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.List;
  *
  * @author hitsz
  */
-public abstract class AbstractEnemyAircraft extends AbstractAircraft {
+public abstract class AbstractEnemyAircraft extends AbstractAircraft implements BombObserver{
 
     public AbstractEnemyAircraft(int locationX, int locationY, int speedX, int speedY, int hp) {
         super(locationX, locationY, speedX, speedY, hp);
@@ -23,6 +24,9 @@ public abstract class AbstractEnemyAircraft extends AbstractAircraft {
             vanish();
         }
     }
+
+     @Override
+     public abstract void Bombupdate();
 
     public abstract List<AbstractProp> dropProps();
 }
