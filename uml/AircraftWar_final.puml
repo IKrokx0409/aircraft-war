@@ -1,0 +1,193 @@
+@startuml
+title Aircraft War - Final UML
+
+interface ShootStrategy {
+    + shoot(aircraft : AbstractAircraft) : List<BaseBullet>
+}
+
+interface BombObserver {
+    + Bombupdate()
+}
+
+'飞行物
+abstract class AbstractFlyingObject {
+    # locationX : int
+    # locationY : int
+    # speedX : int
+    # speedY : int
+    # image : BufferedImage
+    # width : int
+    # height : int
+    # isValid : boolean
+    + AbstractFlyingObject(int, int, int, int)
+    + forward()
+    + crash(flyingObject : AbstractFlyingObject) : boolean
+    + getLocationX() : int
+    + getLocationY() : int
+    + setLocation(double, double)
+    + getSpeedY() : int
+    + getImage() : BufferedImage
+    + getWidth() : int
+    + getHeight() : int
+    + notValid() : boolean
+    + vanish()
+}
+
+' 策略实现
+class DirectShoot implements ShootStrategy {
+    + shoot(aircraft : AbstractAircraft) : List<BaseBullet>
+}
+
+class ScatterShoot implements ShootStrategy {
+    + shoot(aircraft : AbstractAircraft) : List<BaseBullet>
+}
+
+class CircularShoot implements ShootStrategy {
+    + shoot(aircraft : AbstractAircraft) : List<BaseBullet>
+}
+
+class NoShoot implements ShootStrategy {
+    + shoot(aircraft : AbstractAircraft) : List<BaseBullet>
+}
+
+
+' 游戏逻辑类
+class Game implements BombObserver {
+    # enemyAircrafts : List<AbstractEnemyAircraft>
+    + getEnemyAircrafts() : List<AbstractEnemyAircraft>
+    + addScore(int)
+    + Bombupdate()
+}
+
+'飞机
+abstract class AbstractAircraft extends AbstractFlyingObject {
+    # maxHp : int
+    # hp : int
+    # direction : int
+    # power : int
+    - strategy : ShootStrategy
+    + AbstractAircraft(int, int, int, int, int)
+    + decreaseHp(decrease : int)
+    + getHp() : int
+    + setStrategy(strategy : ShootStrategy)
+    + shoot() : List<BaseBullet>
+    + getPower() : int
+    + getDirection() : int
+}
+
+class HeroAircraft extends AbstractAircraft {
+    - {static} volatile instance : HeroAircraft
+    - propTimerThread : Thread
+    + HeroAircraft(int, int, int, int, int)
+    + {static} getInstance() : HeroAircraft
+    + resetShootStrategy()
+    + activatePropEffect(times : long)
+    + forward()
+    + increaseHp(increase : int)
+}
+
+abstract class AbstractEnemyAircraft extends AbstractAircraft implements BombObserver {
+    + AbstractEnemyAircraft(int, int, int, int, int)
+    + forward()
+    + {abstract} Bombupdate()
+    + {abstract} dropProps() : List<AbstractProp>
+}
+
+class MobEnemy extends AbstractEnemyAircraft {
+    + MobEnemy(int, int, int, int, int)
+    + shoot() : List<BaseBullet>
+    + dropProps() : List<AbstractProp>
+    + Bombupdate()
+}
+
+class EliteEnemy extends AbstractEnemyAircraft {
+    + EliteEnemy(int, int, int, int, int)
+    + Bombupdate()
+    + dropProps() : List<AbstractProp>
+}
+
+class ElitePlusEnemy extends AbstractEnemyAircraft {
+    + ElitePlusEnemy(int, int, int, int, int)
+    + Bombupdate()
+    + dropProps() : List<AbstractProp>
+}
+
+class BossEnemy extends AbstractEnemyAircraft {
+    + BossEnemy(int, int, int, int, int)
+    + Bombupdate()
+    + forward()
+    + dropProps() : List<AbstractProp>
+}
+
+' 子弹
+abstract class BaseBullet extends AbstractFlyingObject {
+    - power : int
+    + BaseBullet(int, int, int, int, int)
+    + forward()
+    + getPower() : int
+}
+
+class HeroBullet extends BaseBullet {
+    + HeroBullet(int, int, int, int, int)
+}
+
+class EnemyBullet extends BaseBullet {
+    + EnemyBullet(int, int, int, int, int)
+}
+
+
+' 道具
+abstract class AbstractProp extends AbstractFlyingObject {
+    + AbstractProp(int, int, int, int)
+    + forward()
+    + activate(hero : HeroAircraft)
+}
+
+class HpProp extends AbstractProp {
+    + HpProp(int, int, int, int)
+    + activate(hero : HeroAircraft)
+}
+
+class FireProp extends AbstractProp {
+    + FireProp(int, int, int, int)
+    + activate(hero : HeroAircraft)
+}
+
+class FirePlusProp extends AbstractProp {
+    + FirePlusProp(int, int, int, int)
+    + activate(hero : HeroAircraft)
+}
+
+class BombProp extends AbstractProp {
+    + BombProp(int, int, int, int)
+    + activate(hero : HeroAircraft, gameInstance : Game)
+    - notifyAllObservers(gameInstance : Game)
+}
+
+
+' 关系
+' 策略模式关系
+AbstractAircraft o-- ShootStrategy
+
+' 依赖关系
+AbstractAircraft ..> BaseBullet
+AbstractEnemyAircraft ..> AbstractProp
+AbstractProp ..> HeroAircraft
+BombProp ..> Game
+
+' Game与Aircraft的交互
+Game ..> AbstractEnemyAircraft
+Game ..> HeroAircraft
+
+'' 策略实现与接口
+'DirectShoot .up.|> ShootStrategy
+'ScatterShoot .up.|> ShootStrategy
+'CircularShoot .up.|> ShootStrategy
+'NoShoot .up.|> ShootStrategy
+'
+'' 观察者实现与接口
+' AbstractEnemyAircraft .up.|> BombObserver
+'
+'Game .up.|> BombObserver
+
+@enduml
